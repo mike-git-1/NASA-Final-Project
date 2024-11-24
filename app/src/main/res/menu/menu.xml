@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item android:id="@+id/item_home"
+        android:icon="@drawable/home"
+        android:orderInCategory="75"
+        app:showAsAction="always"
+        android:title="Not used, since showAsAction=always"/>
+
+    <item android:id="@+id/item_image"
+        android:title="My Images"
+        android:icon="@drawable/folder"
+        android:orderInCategory="100"
+        app:showAsAction="always"/>  <!-- This uses showAsAction=always, so look at icon= parameter -->
+
+    <item android:id="@+id/item_share"
+        android:title="Share"
+        app:showAsAction="never"
+        android:orderInCategory="400"/>
+
+    <item android:id="@+id/item_settings"
+        android:title="Settings"
+        app:showAsAction="never"
+        android:orderInCategory="500"/>
+
+    <item android:id="@+id/item_help"
+        android:title="Help"
+        app:showAsAction="never"
+        android:orderInCategory="600"/> <!-- This uses showAsAction=never, so look at title= parameter -->
+
+
+
+</menu>
