@@ -6,9 +6,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <include
-        layout="@layout/base_layout"
-        />
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:id="@+id/toolbar">
+        <TextView
+            android:id="@+id/theTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:padding="10dp"
+            android:text="@string/main_title"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center" />
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"

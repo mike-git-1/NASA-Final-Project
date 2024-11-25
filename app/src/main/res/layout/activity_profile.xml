@@ -6,9 +6,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <include
-        layout="@layout/base_layout"
-        />
+    <androidx.appcompat.widget.Toolbar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/black"
+        android:id="@+id/toolbar">
+        <TextView
+            android:id="@+id/theTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:padding="10dp"
+            android:text="@string/listPage_title"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center" />
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.drawerlayout.widget.DrawerLayout
         android:id="@+id/drawer_layout"
@@ -26,34 +38,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:paddingVertical="16dp">
 
                 <!-- Title column -->
                 <TextView
                     android:id="@+id/tableCol_title"
-                    android:layout_width="0dp"
+                    android:layout_width="220dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="2"
                     android:text="@string/tableCol_title"
                     android:textSize="16sp"
+                    android:layout_marginRight="15dp"
                     android:textColor="@android:color/black"/>
 
                 <!-- Date column -->
                 <TextView
                     android:id="@+id/tableCol_date"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="110dp"
                     android:layout_height="wrap_content"
                     android:text="@string/tableCol_date"
                     android:textSize="16sp"
+                    android:layout_marginRight="15dp"
                     android:textColor="@android:color/black"/>
 
             </LinearLayout>
 
             <ListView
                 android:id="@+id/theListView"
-                android:layout_width="0dp"
-                android:layout_height="0dp" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 

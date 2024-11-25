@@ -2,23 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:paddingVertical="5dp"
     android:orientation="horizontal">
 
     <!-- Title column -->
     <TextView
         android:id="@+id/item_title"
-        android:layout_width="0dp"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
         android:textSize="16sp"
+        android:layout_marginRight="15dp"
         android:textColor="@android:color/black"/>
 
     <!-- Date column -->
     <TextView
         android:id="@+id/item_date"
-        android:layout_width="0dp"
+        android:layout_width="110dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:textSize="16sp"
         android:textColor="@android:color/black"/>
+
+    <ImageButton
+        android:id="@+id/trash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/trash"
+        android:src="@drawable/trash"
+        android:background="@color/white"
+
+        />
 </LinearLayout>

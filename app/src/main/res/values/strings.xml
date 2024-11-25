@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">NASA Final Project</string>
-    <string name="main_title">NASA Image Search</string>
+    <string name="main_title">NASA Image Search (v.1)</string>
     <string name="text_hint">Select a date</string>
     <string name="textView_date">"Date: "</string>
     <string name="textView_fill">no results</string>
@@ -11,7 +11,7 @@
     <string name="textView_title">"Title: "</string>
     <string name="textView_explanation">"Info: "</string>
     <string name="nav_home">Home</string>
-    <string name="nav_images">My images</string>
+    <string name="nav_images">My Images</string>
     <string name="nav_help">Help</string>
     <string name="open">Open</string>
     <string name="close">Close</string>
@@ -19,5 +19,7 @@
     <string name="nav_share">Share</string>
     <string name="tableCol_title">Title</string>
     <string name="tableCol_date">Date</string>
+    <string name="listPage_title">My Images (v.1)</string>
+    <string name="trash">Delete item</string>
 
 </resources>

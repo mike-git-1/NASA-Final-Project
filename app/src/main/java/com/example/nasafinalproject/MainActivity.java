@@ -1,7 +1,9 @@
 package com.example.nasafinalproject;
 
 import android.app.DatePickerDialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -60,10 +62,15 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private TextView textView_hdUrl ;
     private TextView textView_title ;
     private TextView textView_explanation;
+    private SQLiteDatabase db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MyOpener dbOpener = new MyOpener(this);
+        db = dbOpener.getWritableDatabase();
 
         // Find the views by their ID's
         Button pickDateButton = findViewById(R.id.pickDate);
@@ -186,9 +193,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             Intent mainPage = new Intent(this, MainActivity.class);
             startActivity(mainPage);
         } else if (id == R.id.nav_image) {
-            finish();
-//            Intent dadJokePage = new Intent(this, DadJoke.class);
-//            startActivity(dadJokePage);
+            Intent storedImagesPage = new Intent(this, ListActivity.class);
+            startActivity(storedImagesPage);
         } else if (id == R.id.nav_help) {
             finish();
         }
@@ -242,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
                 // get the data from JSON response
                 date = NasaData.getString("date");
-//              explanation = NasaData.getString("explanation");
+                explanation = NasaData.getString("explanation");
                 hdUrl = NasaData.getString("hdurl");
                 url = NasaData.getString("url");
                 title = NasaData.getString("title");
@@ -279,20 +285,30 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
             // Set up button click listener to download the image
             saveBtn.setOnClickListener((click) -> {
-                // Trigger the image download task when the button is clicked
-                nasaImage = new NasaImage(date,explanation,hdUrl,url,title);
-                storedImages .add(nasaImage);
-                new DownloadImageTask().execute(nasaImage);
+                // Save to database and Trigger the image download task when the button is clicked
+                ContentValues newRowValues = new ContentValues();
+                //put items to their database columns
+                newRowValues.put(MyOpener.COL_DATE, date);
+                newRowValues.put(MyOpener.COL_EXPLANATION, explanation);
+                newRowValues.put(MyOpener.COL_HDURL, hdUrl);
+                newRowValues.put(MyOpener.COL_URL, url);
+                newRowValues.put(MyOpener.COL_TITLE, title);
+
+                //Now insert in the database:
+                //insert method returns the new row's ID,
+                long newId = db.insert(MyOpener.TABLE_NAME, null, newRowValues);
+                Log.i("db", "Saved to db." + newId);
+                new DownloadImageTask().execute(url, title);
             });
 
         }
     }
-    private class DownloadImageTask extends AsyncTask<NasaImage, Void, Boolean> {
+    private class DownloadImageTask extends AsyncTask<String, Void, Boolean> {
 
         @Override
-        protected Boolean doInBackground(NasaImage... params) {
-            String imageUrl = params[0].getUrl();
-            String title = params[0].getTitle();
+        protected Boolean doInBackground(String... params) {
+            String imageUrl = params[0];
+            String title = params[1];
             Bitmap newImg = null;
 
             try {
@@ -302,11 +318,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
                 // Decode the image from the input stream
                 newImg = BitmapFactory.decodeStream(connection.getInputStream());
-
-                if (newImg == null) {
-                    Log.e("DownloadImageTask", "Failed to decode the image.");
-                    return false;
-                }
 
                 // Generate a filename based on the title
                 String fileName = title.replace(" ", "-");
@@ -319,7 +330,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                         newImg.compress(Bitmap.CompressFormat.JPEG, 80, outputStream); // Save as JPEG
                         outputStream.flush(); // Ensure data is written to file
                         outputStream.close();
-
 
                         return true;  // Image saved successfully
 
@@ -348,69 +358,9 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     }
 
 
-//    private class MyListAdapter extends BaseAdapter {
-//
-//        public int getCount() { return nasaImages.size(); }
-//        public String getItem(int position) { return nasaImages.get(position).getTitle();}
-//        public long getItemId(int position) { return (long) position; }
-//
-//        public View getView(int position, View old, ViewGroup parent) {
-//
-//            View newView = old;
-//            LayoutInflater inflater = getLayoutInflater();
-//
-//            //make a new row:
-//            if(newView == null) {
-//                newView = inflater.inflate(R.layout.row_layout, parent, false);
-//
-//            }
-//
-//            //set what the text should be for this row:
-//            TextView tView = newView.findViewById(R.id.nasa_img);
-//            tView.setText(getItem(position));
-//
-//            //return it to be put in the table
-//            return newView;
-//        }
-//    }
-
-    private static class NasaImage {
-
-        private String date;
-        private String explanation;
-        private String hdUrl;
-        private String url;
-        private String title;
-
-        public NasaImage(String date, String explanation, String hdUrl, String url, String title) {
-            this.date = date;
-            this.explanation = explanation;
-            this.hdUrl = hdUrl;
-            this.url = url;
-            this.title = title;
-        }
-
-        public String getDate() {
-            return this.date;
-        }
-
-        public String getExplanation() {
-            return this.explanation;
-        }
-
-        public String getHdUrl() {
-            return this.hdUrl;
-        }
-
-        public String getUrl() {
-            return this.url;
-        }
-
-        public String getTitle() {
-            return this.title;
-        }
 
 
 
-    }
+
+
 }
