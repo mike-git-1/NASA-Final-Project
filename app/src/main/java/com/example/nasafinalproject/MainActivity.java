@@ -2,7 +2,6 @@ package com.example.nasafinalproject;
 
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -10,16 +9,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.content.Intent;
@@ -42,18 +36,13 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.snackbar.Snackbar;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONStringer;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, NavigationView.OnNavigationItemSelectedListener  {
     private ArrayList<NasaImage> storedImages = new ArrayList<>();
-    //    private MyListAdapter myAdapter;
-    //    public static final String SW_NAME = "NAME";
-    //    public static final String SW_HEIGHT = "HEIGHT";
-    //    public static final String SW_MASS = "MASS";
+
+
     private TextView textView;
     private ProgressBar progressBar;
     private Button saveBtn;
@@ -71,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
         MyOpener dbOpener = new MyOpener(this);
         db = dbOpener.getWritableDatabase();
+
 
         // Find the views by their ID's
         Button pickDateButton = findViewById(R.id.pickDate);
@@ -110,42 +100,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         navigationView.setNavigationItemSelectedListener(this);
 
 
-//        ListView theList = findViewById(R.id.theList);
 
-        // check if the FrameLayout is loaded
-        // If findViewById returns not null, then you are on a tablet.
-        // If findViewById returns null, then you are running on a phone.
-//        boolean isTablet = findViewById(R.id.fragmentLocation) != null;
-
-//        myAdapter = new MyListAdapter();
-//        theList.setAdapter(myAdapter);
-
-//        theList.setOnItemClickListener((list, item, position, id) -> {
-//            //Create a bundle to pass data to the new fragment
-//            Bundle dataToPass = new Bundle();
-//            dataToPass.putString(SW_NAME, swCharacters.get(position).getName());
-//            dataToPass.putString(SW_HEIGHT, swCharacters.get(position).getHeight());
-//            dataToPass.putString(SW_MASS, swCharacters.get(position).getMass());
-//
-//
-//            //replacing a fragment (for tablets)
-//            if(isTablet)
-//            {
-//                DetailsFragment dFragment = new DetailsFragment(); //add a DetailsFragment
-//                dFragment.setArguments( dataToPass ); //pass it a bundle for information
-//                getSupportFragmentManager()
-//                        .beginTransaction()
-//                        .replace(R.id.fragmentLocation, dFragment) //Add the fragment in FrameLayout
-//                        .commit(); //actually load the fragment.
-//            }
-//            //starting a new activity (for phones)
-//            else //isPhone
-//            {
-//                Intent nextActivity = new Intent(MainActivity.this, EmptyActivity.class);
-//                nextActivity.putExtras(dataToPass); //send data to next activity
-//                startActivity(nextActivity); //make the transition
-//            }
-//        });
 
     }
     public void onDateSet(DatePicker view, int year, int month, int day) {
@@ -215,7 +170,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         private String hdUrl ;
         private String url ;
         private String title;
-        private NasaImage nasaImage;
+        private String fileName;
+        long newId;
 
 
         public String doInBackground(String... args) {
@@ -293,12 +249,16 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 newRowValues.put(MyOpener.COL_HDURL, hdUrl);
                 newRowValues.put(MyOpener.COL_URL, url);
                 newRowValues.put(MyOpener.COL_TITLE, title);
+                // Generate a filename based on the id
+                fileName = title.replace(" ", "-") + "-" + date + ".jpg";
+                newRowValues.put(MyOpener.COL_IMG_FILE, fileName);
 
                 //Now insert in the database:
                 //insert method returns the new row's ID,
-                long newId = db.insert(MyOpener.TABLE_NAME, null, newRowValues);
-                Log.i("db", "Saved to db." + newId);
-                new DownloadImageTask().execute(url, title);
+                newId = db.insert(MyOpener.TABLE_NAME, null, newRowValues);
+
+                Log.i("db", "Saved to db: " + fileName);
+                new DownloadImageTask().execute(url, fileName);
             });
 
         }
@@ -308,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         @Override
         protected Boolean doInBackground(String... params) {
             String imageUrl = params[0];
-            String title = params[1];
+            String fileName = params[1];
             Bitmap newImg = null;
 
             try {
@@ -319,9 +279,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 // Decode the image from the input stream
                 newImg = BitmapFactory.decodeStream(connection.getInputStream());
 
-                // Generate a filename based on the title
-                String fileName = title.replace(" ", "-");
-                File imageFile = new File(getFilesDir(), fileName + ".jpg");
+                File imageFile = new File(getFilesDir(), fileName );
 
                 // Check if the file already exists
                 if (!imageFile.exists()) {

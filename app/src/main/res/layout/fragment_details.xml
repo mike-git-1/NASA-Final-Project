@@ -1,67 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".DetailsFragment"
     android:id="@+id/fragmentLocation"
+    android:paddingHorizontal="15dp"
     android:background="@color/cardview_light_background">
 
-<!--    &lt;!&ndash; TODO: Update blank fragment layout &ndash;&gt;-->
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-<!--        <TextView-->
-<!--            android:id="@+id/theTextView1"-->
-<!--            android:layout_width="75dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="name"-->
-<!--            android:textSize="20sp"-->
-<!--            android:textStyle="bold"/>-->
-<!--        <TextView-->
-<!--            android:id="@+id/fill_me1"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/fill"-->
-<!--            android:textSize="20sp"/>-->
-<!--    </LinearLayout>-->
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-<!--        <TextView-->
-<!--            android:id="@+id/theTextView2"-->
-<!--            android:layout_width="75dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/height"-->
-<!--            android:textSize="20sp"-->
-<!--            android:textStyle="bold"/>-->
-<!--        <TextView-->
-<!--            android:id="@+id/fill_me2"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/fill"-->
-<!--            android:textSize="20sp"/>-->
-<!--    </LinearLayout>-->
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-<!--        <TextView-->
-<!--            android:id="@+id/theTextView3"-->
-<!--            android:layout_width="75dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/mass"-->
-<!--            android:textSize="20sp"-->
-<!--            android:textStyle="bold"/>-->
-<!--        <TextView-->
-<!--            android:id="@+id/fill_me3"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:text="@string/fill"-->
-<!--            android:textSize="20sp"/>-->
-<!--    </LinearLayout>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginVertical="15dp"
+        >
+
+        <TextView
+            android:id="@+id/textView_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_title"
+            android:textColorHint="@android:color/darker_gray"
+            android:width="70dp"/>
+        <TextView
+            android:id="@+id/textView_titleFill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_fill"
+            android:textColorHint="@android:color/darker_gray"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginVertical="15dp"
+        >
+
+        <TextView
+            android:id="@+id/textView_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_date"
+            android:textColorHint="@android:color/darker_gray"
+            android:width="70dp"/>
+        <TextView
+            android:id="@+id/textView_dateFill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_fill"
+            android:textColorHint="@android:color/darker_gray"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginVertical="15dp"
+        >
+
+        <TextView
+            android:id="@+id/textView_desc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_desc"
+            android:textColorHint="@android:color/darker_gray"
+            android:layout_marginBottom="10dp"
+            />
+
+        <TextView
+            android:id="@+id/textView_descFill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/textView_fill"
+            android:maxHeight="250dp"
+            android:scrollbars="vertical"
+            android:scrollHorizontally="false"
+            android:textColorHint="@android:color/darker_gray"/>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginVertical="15dp"
+
+        >
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:id="@+id/imageView"/>
+
+    </LinearLayout>
+
 </LinearLayout>

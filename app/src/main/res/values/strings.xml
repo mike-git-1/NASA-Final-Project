@@ -21,5 +21,7 @@
     <string name="tableCol_date">Date</string>
     <string name="listPage_title">My Images (v.1)</string>
     <string name="trash">Delete item</string>
+    <string name="textView_desc">"Description: "</string>
+    <string name="details_title">Details Page (v.1)</string>
 
 </resources>

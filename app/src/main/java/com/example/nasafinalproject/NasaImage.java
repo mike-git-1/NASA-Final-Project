@@ -1,21 +1,27 @@
 package com.example.nasafinalproject;
 
+import java.io.File;
+import android.content.Context;
+
 public class NasaImage {
 
+    private Context context;
     private long id;
     private String date;
     private String explanation;
     private String hdUrl;
     private String url;
     private String title;
+    private String imageFile;
 
-    public NasaImage(long id, String title, String date, String explanation, String url, String hdUrl ) {
+    public NasaImage(long id, String title, String date, String explanation, String url, String hdUrl, String imageFile ) {
         this.id = id;
         this.title = title;
         this.date = date;
         this.explanation = explanation;
         this.url = url;
         this.hdUrl = hdUrl;
+        this.imageFile = imageFile;
     }
 
     public long getId() {
@@ -42,6 +48,10 @@ public class NasaImage {
         return this.title;
     }
 
+    public String getImageFile() {
+        return imageFile;
+    }
+
     public void setDate(String date) {
         this.date = date;
     }
@@ -64,5 +74,9 @@ public class NasaImage {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public void setImageFile(String imageFile) {
+        this.imageFile = imageFile;
     }
 }

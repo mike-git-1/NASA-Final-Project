@@ -5,34 +5,30 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import android.content.ContentValues;
+
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.Bundle;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
+
+import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.Switch;
+
 import android.widget.TextView;
 import android.widget.BaseAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.graphics.Color;
+
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
-
+import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
@@ -46,21 +42,68 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     private MyListAdapter myAdapter;
     private SQLiteDatabase db;
 
+    public static final String IMG_TITLE = "TITLE";
+    public static final String IMG_DATE = "DATE";
+    public static final String IMG_DESC = "DESCRIPTION";
+    public static final String IMG_FILE = "FILE";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        //create an adapter object and send it to the listVIew
+//      check if the FrameLayout is loaded
+//      If findViewById returns not null, then you are on a tablet.
+//      If findViewById returns null, then you are running on a phone.
+        boolean isTablet = findViewById(R.id.fragmentLocation) != null;
 
+        //create an adapter object and send it to the listVIew
         myAdapter = new MyListAdapter();
 
         loadDataFromDatabase(); //get any previously saved images
 
         ListView myList = findViewById(R.id.theListView);
+
         myList.setAdapter(myAdapter);
 
+        myList.setOnItemClickListener((list, item, position, id) -> {
+            Log.i("test", "onCreate: ");
+            //Create a bundle to pass data to the new fragment
+            Bundle dataToPass = new Bundle();
+            dataToPass.putString(IMG_TITLE, storedImages.get(position).getTitle());
+            dataToPass.putString(IMG_DATE, storedImages.get(position).getDate());
+            dataToPass.putString(IMG_DESC, storedImages.get(position).getExplanation());
 
+            // get the file and pass to bundle
+
+            File file = new File(getFilesDir(), storedImages.get(position).getImageFile());
+            String imageFile;
+            if (file.exists()) {
+                imageFile = file.getAbsolutePath();
+            } else {
+                imageFile = null;
+            }
+            dataToPass.putString(IMG_FILE, imageFile);
+
+
+            //replacing a fragment (for tablets)
+            if(isTablet)
+            {
+                DetailsFragment dFragment = new DetailsFragment(); //add a DetailsFragment
+                dFragment.setArguments( dataToPass ); //pass it a bundle for information
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragmentLocation, dFragment) //Add the fragment in FrameLayout
+                        .commit(); //actually load the fragment.
+            }
+            //starting a new activity (for phones)
+            else //isPhone
+            {
+                Intent nextActivity = new Intent(ListActivity.this, EmptyActivity.class);
+                nextActivity.putExtras(dataToPass); //send data to next activity
+                startActivity(nextActivity); //make the transition
+            }
+        });
 
         //This gets the toolbar from the layout:
         Toolbar tBar = findViewById(R.id.toolbar);
@@ -77,7 +120,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 
 
 
@@ -141,7 +183,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
                 MyOpener.COL_DATE,
                 MyOpener.COL_EXPLANATION,
                 MyOpener.COL_HDURL,
-                MyOpener.COL_URL
+                MyOpener.COL_URL,
+                MyOpener.COL_IMG_FILE
         };
         //query all the results from the database:
         Cursor results = db.query(false, MyOpener.TABLE_NAME, columns, null, null, null, null, null, null);
@@ -154,7 +197,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         int explanationColIndex = results.getColumnIndex(MyOpener.COL_EXPLANATION);
         int hdurlColIndex = results.getColumnIndex(MyOpener.COL_HDURL);
         int urlColIndex = results.getColumnIndex(MyOpener.COL_URL);
-
+        int imgFileColIndex = results.getColumnIndex(MyOpener.COL_IMG_FILE);
+        int i = 0;
         //iterate over the results, return true if there is a next item:
         while(results.moveToNext())
         {
@@ -164,14 +208,16 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             String explanation = results.getString(explanationColIndex);
             String hdUrl = results.getString(hdurlColIndex);
             String url = results.getString(urlColIndex);
+            String imgFile = results.getString(imgFileColIndex);
 
 
             //add the new Contact to the array list:
-            storedImages.add(new NasaImage(id, title, date,explanation,hdUrl,url));
-
+            storedImages.add(new NasaImage(id, title, date,explanation,hdUrl,url,imgFile));
+            Log.i("Title", "loadDataFromDatabase: " + storedImages.get(i).getId() +" " + storedImages.get(i).getImageFile() );
+            i++;
         }
 
-        Log.i("Title", "loadDataFromDatabase: " + storedImages.get(0).getTitle() +" " + storedImages.get(1).getTitle() );
+
         results.close();
 
         myAdapter.notifyDataSetChanged();
@@ -186,7 +232,6 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         public long getItemId(int position) { return (long) position; }
 
         public View getView(int position, View old, ViewGroup parent) {
-            Log.d("ListActivity", "getView called for position: " + position);
             View newView = old;
             LayoutInflater inflater = getLayoutInflater();
 
@@ -199,7 +244,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             //set what the text should be for this row:
             TextView tView_title = newView.findViewById(R.id.item_title);
             TextView tView_date = newView.findViewById(R.id.item_date);
-            ImageButton trashBtn = newView.findViewById(R.id.trash);
+            ImageView trashBtn = newView.findViewById(R.id.trash);
 
             tView_title.setText(getItem(position).getTitle());
             tView_date.setText(getItem(position).getDate());
@@ -207,10 +252,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             trashBtn.setOnClickListener(c -> {
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
-                alertDialogBuilder.setTitle("Do you want to delete this?")
+                alertDialogBuilder.setTitle("Are you sure you want to delete this?")
 
                         //What is the message:
-                        .setMessage("The selected item is:\n\n["+ position + "]  " +  storedImages.get(position).getTitle())
+                        .setMessage("You are deleting:\n\n["+ position + "]  " +  storedImages.get(position).getTitle())
 
                         //what the Yes button does:
                         .setPositiveButton("Yes", (click, arg) -> {

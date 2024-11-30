@@ -23,7 +23,7 @@
         android:textSize="16sp"
         android:textColor="@android:color/black"/>
 
-    <ImageButton
+    <ImageView
         android:id="@+id/trash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
