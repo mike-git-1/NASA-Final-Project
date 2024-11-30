@@ -2,6 +2,7 @@ package com.example.nasafinalproject;
 
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ProgressBar;
@@ -27,30 +29,31 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import android.content.Context;
 
 import com.google.android.material.navigation.NavigationView;
+
 
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener, NavigationView.OnNavigationItemSelectedListener  {
-    private ArrayList<NasaImage> storedImages = new ArrayList<>();
 
-
+    private SharedPreferences prefs = null;
     private TextView textView;
     private ProgressBar progressBar;
     private Button saveBtn;
     private TextView textView_date ;
     private TextView textView_url ;
     private TextView textView_hdUrl ;
-    private TextView textView_title ;
-    private TextView textView_explanation;
+    private TextView textView_title ;;
     private SQLiteDatabase db;
 
     @Override
@@ -58,9 +61,9 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         MyOpener dbOpener = new MyOpener(this);
         db = dbOpener.getWritableDatabase();
-
 
         // Find the views by their ID's
         Button pickDateButton = findViewById(R.id.pickDate);
@@ -70,8 +73,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         textView_url = findViewById(R.id.textView_urlFill);
         textView_hdUrl = findViewById(R.id.textView_hdUrlFill);
         textView_title = findViewById(R.id.textView_titleFill);
-        //textView_explanation = findViewById(R.id.textView_explanationFill);
-//        progressBar = findViewById(R.id.progressBar);
+        progressBar = findViewById(R.id.progressBar);
 
         // Set OnClickListener for the button
         pickDateButton.setOnClickListener( (click) -> {
@@ -82,6 +84,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             newFragment.show(getSupportFragmentManager(), "datePicker");
 
         });
+
+        // retrieve string from sharedPrefs and load it back to the TextView
+        prefs = getSharedPreferences("FileName", Context.MODE_PRIVATE);
+        String savedString = prefs.getString("ReserveDate", "");
+        textView.setText(savedString);
+        makeAPIRequest(savedString);
 
         //This gets the toolbar from the layout:
         Toolbar tBar = findViewById(R.id.toolbar);
@@ -100,8 +108,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         navigationView.setNavigationItemSelectedListener(this);
 
 
-
-
     }
     public void onDateSet(DatePicker view, int year, int month, int day) {
         String dateQuery = year + "-" + (month+1) + "-" + day ; // Month is 0-based
@@ -109,10 +115,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         // Update the textView
         textView.setText(dateQuery);
         // API request
+        makeAPIRequest(dateQuery);
+
+    }
+
+    public void makeAPIRequest(String dateQuery){
         NasaAPI req = new NasaAPI();
         String base_apiUrl = "https://api.nasa.gov/planetary/apod?api_key=DgPLcIlnmN0Cwrzcg3e9NraFaYLIDI68Ysc6Zh3d&date=";
         req.execute(base_apiUrl + dateQuery);
-
     }
 
     @Override
@@ -131,8 +141,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             message = "You clicked on Home";
         } else if (id == R.id.item_image) {
             message = "You clicked on My Images";
-        } else {
-            return true;
+        } else if (id==R.id.item_share){
+            message = "You clicked on Share";
+        } else if (id==R.id.item_settings){
+            message = "You clicked on Settings";
+        }else if (id==R.id.item_help){
+            message = "You clicked on Help";
         }
 
         //Look at your menu XML file. Put a case for every id in that file:
@@ -151,27 +165,52 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             Intent storedImagesPage = new Intent(this, ListActivity.class);
             startActivity(storedImagesPage);
         } else if (id == R.id.nav_help) {
-            finish();
-        }
 
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Need Help?")
+
+                //What is the message:
+                .setMessage("Select a date from the date picker to discover interesting trivia about a photo taken by NASA engineers!")
+
+                //what the Yes button does:
+                .setPositiveButton("OK", (click, arg) -> {
+                })
+                //Show the dialog
+                .create().show();
+
+
+        }
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         drawerLayout.closeDrawer(GravityCompat.START);
 
-
         return true;
+    }
+    @Override
+    // EditText is saved whenever the activity goes into the background.
+    protected void onPause() {
+        super.onPause();
+        saveSharedPrefs(textView.getText().toString());
+    }
+
+    // saves string to SharedPrefs
+    private void saveSharedPrefs(String stringToSave)
+    {
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("ReserveDate", stringToSave);
+        editor.commit();
     }
 
 
     private class NasaAPI extends AsyncTask<String, Integer, String> {
 
-        private String date ;
-        private String explanation ;
-        private String hdUrl ;
-        private String url ;
-        private String title;
-        private String fileName;
-        long newId;
+    private String date ;
+    private String explanation ;
+    private String hdUrl ;
+    private String url ;
+    private String title;
+    private String fileName;
+    long newId;
 
 
         public String doInBackground(String... args) {
@@ -220,8 +259,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
 
         public void onProgressUpdate(Integer... args) {
-            //update progress bar
-            progressBar.setProgress(args[0]);
+
         }
 
         // separate network operation (downloading files, API calls) from UI threads so that UI thread isnt blocked
@@ -263,13 +301,17 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
         }
     }
-    private class DownloadImageTask extends AsyncTask<String, Void, Boolean> {
+    private class DownloadImageTask extends AsyncTask<String, Integer, Boolean> {
 
-        @Override
+        protected void onPreExecute() {
+            // Show the progress bar before starting doInBackground
+            progressBar.setVisibility(View.VISIBLE);
+        }
         protected Boolean doInBackground(String... params) {
             String imageUrl = params[0];
             String fileName = params[1];
             Bitmap newImg = null;
+
 
             try {
                 // Open a connection to the image URL
@@ -289,6 +331,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                         outputStream.flush(); // Ensure data is written to file
                         outputStream.close();
 
+                        for (int i = 0; i <= 100; i++) {
+                            try {
+                                Thread.sleep(15);
+                                publishProgress(i); // Update progress
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         return true;  // Image saved successfully
 
                     } catch (IOException e) {
@@ -303,22 +353,22 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 e.printStackTrace();
                 return false;  // Error downloading the image
             }
+
         }
 
-        @Override
+        public void onProgressUpdate(Integer... args) {
+            //update progress bar
+            progressBar.setProgress(args[0]);
+
+        }
+
         protected void onPostExecute(Boolean result) {
             if (result) {
                 Toast.makeText(MainActivity.this, "Image saved successfully!", Toast.LENGTH_LONG).show();
             } else {
                 Toast.makeText(MainActivity.this, "There was an error downloading the image or it's already downloaded.", Toast.LENGTH_LONG).show();
             }
+            progressBar.setVisibility(View.GONE);
         }
     }
-
-
-
-
-
-
-
 }

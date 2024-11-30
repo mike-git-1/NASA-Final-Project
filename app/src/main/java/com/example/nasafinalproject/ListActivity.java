@@ -141,8 +141,12 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             message = "You clicked on Home";
         } else if (id == R.id.item_image) {
             message = "You clicked on My Images";
-        } else {
-            return true;
+        } else if (id==R.id.item_share){
+            message = "You clicked on Share";
+        } else if (id==R.id.item_settings){
+            message = "You clicked on Settings";
+        }else if (id==R.id.item_help){
+            message = "You clicked on Help";
         }
 
         //Look at your menu XML file. Put a case for every id in that file:
@@ -161,7 +165,17 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             Intent storedImagesPage = new Intent(this, ListActivity.class);
             startActivity(storedImagesPage);
         } else if (id == R.id.nav_help) {
-            finish();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Need Help?")
+
+                    //What is the message:
+                    .setMessage("Select an item from the list to view the details about the images you saved.\n\nTo delete an item from the list, click on the trashcan icon.")
+
+                    //what the Yes button does:
+                    .setPositiveButton("OK", (click, arg) -> {
+                    })
+                    //Show the dialog
+                    .create().show();
         }
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -211,7 +225,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             String imgFile = results.getString(imgFileColIndex);
 
 
-            //add the new Contact to the array list:
+            //add the new image to the array list:
             storedImages.add(new NasaImage(id, title, date,explanation,hdUrl,url,imgFile));
             Log.i("Title", "loadDataFromDatabase: " + storedImages.get(i).getId() +" " + storedImages.get(i).getImageFile() );
             i++;
@@ -252,13 +266,23 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             trashBtn.setOnClickListener(c -> {
 
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(ListActivity.this);
-                alertDialogBuilder.setTitle("Are you sure you want to delete this?")
+                alertDialogBuilder.setTitle("Are you sure you want to delete this image?")
 
                         //What is the message:
-                        .setMessage("You are deleting:\n\n["+ position + "]  " +  storedImages.get(position).getTitle())
+                        .setMessage("You are deleting: " +  storedImages.get(position).getTitle())
 
                         //what the Yes button does:
                         .setPositiveButton("Yes", (click, arg) -> {
+                            // Delete the image file from the files directory
+                            File imageFile = new File(getFilesDir(), storedImages.get(position).getImageFile());
+                            if (imageFile.exists()) {
+                                boolean deleted = imageFile.delete();  // Delete the file
+                                if (deleted) {
+                                    Log.i("Delete Image", "Image file deleted: " + imageFile.getAbsolutePath());
+                                } else {
+                                    Log.e("Delete Image", "Failed to delete image file.");
+                                }
+                            }
                             //delete from database - parameterized queries
                             db.delete(MyOpener.TABLE_NAME, MyOpener.COL_ID + "= ?", new String[] {Long.toString(storedImages.get(position).getId())});
                             //delete from array

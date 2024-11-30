@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -65,8 +66,12 @@ public class EmptyActivity extends AppCompatActivity implements NavigationView.O
             message = "You clicked on Home";
         } else if (id == R.id.item_image) {
             message = "You clicked on My Images";
-        } else {
-            return true;
+        } else if (id==R.id.item_share){
+            message = "You clicked on Share";
+        } else if (id==R.id.item_settings){
+            message = "You clicked on Settings";
+        }else if (id==R.id.item_help){
+            message = "You clicked on Help";
         }
 
         //Look at your menu XML file. Put a case for every id in that file:
@@ -85,7 +90,17 @@ public class EmptyActivity extends AppCompatActivity implements NavigationView.O
             Intent storedImagesPage = new Intent(this, ListActivity.class);
             startActivity(storedImagesPage);
         } else if (id == R.id.nav_help) {
-            finish();
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Need Help?")
+
+                //What is the message:
+                .setMessage("This page shows the details about the image you saved. Return to the previous menu to view your other images.")
+
+                //what the Yes button does:
+                .setPositiveButton("OK", (click, arg) -> {
+                })
+                //Show the dialog
+                .create().show();
         }
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
