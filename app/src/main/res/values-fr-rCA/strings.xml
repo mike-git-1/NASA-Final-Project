@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NASA Final Project</string>
+    <string name="main_title">MainActivity (v.1)</string>
+    <string name="text_hint">Choisir une date</string>
+    <string name="textView_date">"Date: "</string>
+    <string name="textView_fill">aucun résultat</string>
+    <string name="textView_url">"URL: "</string>
+    <string name="textView_hdUrl">"HD URL: "</string>
+    <string name="saveBtn">Télécharger l\'image</string>
+    <string name="pickDate">Choisir une date</string>
+    <string name="textView_title">"Titre: "</string>
+    <string name="textView_explanation">"Infos: "</string>
+    <string name="nav_home">Page d\'accueil</string>
+    <string name="nav_images">Mes images</string>
+    <string name="nav_help">Aide</string>
+    <string name="open">Ouvre</string>
+    <string name="close">Ferme</string>
+    <string name="nav_settings">Paramètres</string>
+    <string name="nav_share">Partager</string>
+    <string name="tableCol_title">Titre</string>
+    <string name="tableCol_date">Date</string>
+    <string name="listPage_title">ListActivity (v.1)</string>
+    <string name="trash">Supprimer cette image</string>
+    <string name="textView_desc">"Description: "</string>
+    <string name="details_title">EmptyActivity (v.1)</string>
+</resources>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:paddingVertical="5dp"
+    android:orientation="horizontal">
+
+    <!-- Title column -->
+    <TextView
+        android:id="@+id/item_title"
+        android:layout_width="230dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:paddingEnd="30dp"
+        android:textColor="@android:color/black"/>
+
+    <!-- Date column -->
+    <TextView
+        android:id="@+id/item_date"
+        android:layout_width="110dp"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"/>
+
+    <ImageView
+        android:id="@+id/trash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/trash"
+        android:src="@drawable/trash"
+        android:background="@color/white"
+
+        />
+</LinearLayout>

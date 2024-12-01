@@ -38,7 +38,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 public class ListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ArrayList<NasaImage> storedImages = new ArrayList<>();
+    private final ArrayList<NasaImage> storedImages = new ArrayList<>();
     private MyListAdapter myAdapter;
     private SQLiteDatabase db;
 
@@ -46,11 +46,16 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     public static final String IMG_DATE = "DATE";
     public static final String IMG_DESC = "DESCRIPTION";
     public static final String IMG_FILE = "FILE";
+    private Intent mainPage;
+    private Intent storedImagesPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        mainPage = new Intent(this, MainActivity.class);
+        storedImagesPage = new Intent(this, ListActivity.class);
 
 //      check if the FrameLayout is loaded
 //      If findViewById returns not null, then you are on a tablet.
@@ -138,14 +143,27 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
         String message = null;
         int id = item.getItemId();
         if (id == R.id.item_home) {
+            startActivity(mainPage);
             message = "You clicked on Home";
         } else if (id == R.id.item_image) {
+            startActivity(storedImagesPage);
             message = "You clicked on My Images";
         } else if (id==R.id.item_share){
             message = "You clicked on Share";
         } else if (id==R.id.item_settings){
             message = "You clicked on Settings";
         }else if (id==R.id.item_help){
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Need Help?")
+
+                    //What is the message:
+                    .setMessage("Select an item from the list to view the details about the images you saved.\n\nTo delete an item from the list, click on the trashcan icon.")
+
+                    //what the Yes button does:
+                    .setPositiveButton("OK", (click, arg) -> {
+                    })
+                    //Show the dialog
+                    .create().show();
             message = "You clicked on Help";
         }
 
@@ -159,10 +177,8 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected( MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_home) {
-            Intent mainPage = new Intent(this, MainActivity.class);
             startActivity(mainPage);
         } else if (id == R.id.nav_image) {
-            Intent storedImagesPage = new Intent(this, ListActivity.class);
             startActivity(storedImagesPage);
         } else if (id == R.id.nav_help) {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
@@ -231,12 +247,10 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
             i++;
         }
 
-
         results.close();
 
         myAdapter.notifyDataSetChanged();
-//        printCursor(results);
-        //At this point, the elements array has loaded every row from the cursor.
+
     }
 
     private class MyListAdapter extends BaseAdapter {
@@ -255,7 +269,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
             }
 
-            //set what the text should be for this row:
+            //set what the text should be for each row:
             TextView tView_title = newView.findViewById(R.id.item_title);
             TextView tView_date = newView.findViewById(R.id.item_date);
             ImageView trashBtn = newView.findViewById(R.id.trash);
@@ -273,7 +287,7 @@ public class ListActivity extends AppCompatActivity implements NavigationView.On
 
                         //what the Yes button does:
                         .setPositiveButton("Yes", (click, arg) -> {
-                            // Delete the image file from the files directory
+                            // Delete from the files directory
                             File imageFile = new File(getFilesDir(), storedImages.get(position).getImageFile());
                             if (imageFile.exists()) {
                                 boolean deleted = imageFile.delete();  // Delete the file

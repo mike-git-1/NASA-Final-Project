@@ -17,10 +17,17 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import com.google.android.material.navigation.NavigationView;
 
 public class EmptyActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+
+    private Intent mainPage;
+    private Intent storedImagesPage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_empty);
+
+        mainPage = new Intent(this, MainActivity.class);
+        storedImagesPage = new Intent(this, ListActivity.class);
 
         Bundle dataToPass = getIntent().getExtras(); //get the data that was passed from MainActivity
 
@@ -63,14 +70,27 @@ public class EmptyActivity extends AppCompatActivity implements NavigationView.O
         String message = null;
         int id = item.getItemId();
         if (id == R.id.item_home) {
+            startActivity(mainPage);
             message = "You clicked on Home";
         } else if (id == R.id.item_image) {
+            startActivity(storedImagesPage);
             message = "You clicked on My Images";
         } else if (id==R.id.item_share){
             message = "You clicked on Share";
         } else if (id==R.id.item_settings){
             message = "You clicked on Settings";
         }else if (id==R.id.item_help){
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Need Help?")
+
+                    //What is the message:
+                    .setMessage("This page shows the details about the image you saved. Return to the previous menu to view your other images.")
+
+                    //what the Yes button does:
+                    .setPositiveButton("OK", (click, arg) -> {
+                    })
+                    //Show the dialog
+                    .create().show();
             message = "You clicked on Help";
         }
 

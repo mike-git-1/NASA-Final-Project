@@ -53,14 +53,18 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private TextView textView_date ;
     private TextView textView_url ;
     private TextView textView_hdUrl ;
-    private TextView textView_title ;;
+    private TextView textView_title ;
     private SQLiteDatabase db;
+    private Intent mainPage;
+    private Intent storedImagesPage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mainPage = new Intent(this, MainActivity.class);
+        storedImagesPage = new Intent(this, ListActivity.class);
 
         MyOpener dbOpener = new MyOpener(this);
         db = dbOpener.getWritableDatabase();
@@ -89,6 +93,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         prefs = getSharedPreferences("FileName", Context.MODE_PRIVATE);
         String savedString = prefs.getString("ReserveDate", "");
         textView.setText(savedString);
+        // make api request based on savedString
         makeAPIRequest(savedString);
 
         //This gets the toolbar from the layout:
@@ -107,8 +112,9 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-
     }
+
+    // what to do with the selected date
     public void onDateSet(DatePicker view, int year, int month, int day) {
         String dateQuery = year + "-" + (month+1) + "-" + day ; // Month is 0-based
         Toast.makeText(MainActivity.this, "Selected date: " + dateQuery, Toast.LENGTH_SHORT).show();
@@ -119,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
     }
 
+    // logic for making API request
     public void makeAPIRequest(String dateQuery){
         NasaAPI req = new NasaAPI();
         String base_apiUrl = "https://api.nasa.gov/planetary/apod?api_key=DgPLcIlnmN0Cwrzcg3e9NraFaYLIDI68Ysc6Zh3d&date=";
@@ -138,18 +145,30 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         String message = null;
         int id = item.getItemId();
         if (id == R.id.item_home) {
+            startActivity(mainPage);
             message = "You clicked on Home";
         } else if (id == R.id.item_image) {
-            message = "You clicked on My Images";
+            startActivity(storedImagesPage);
+            message = "You clicked on Images";
         } else if (id==R.id.item_share){
             message = "You clicked on Share";
         } else if (id==R.id.item_settings){
             message = "You clicked on Settings";
         }else if (id==R.id.item_help){
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+            alertDialogBuilder.setTitle("Need Help?")
+
+                    //What is the message:
+                    .setMessage("Select a date from the date picker to discover interesting trivia about a photo taken by NASA engineers!")
+
+                    //what the Yes button does:
+                    .setPositiveButton("OK", (click, arg) -> {
+                    })
+                    //Show the dialog
+                    .create().show();
             message = "You clicked on Help";
         }
 
-        //Look at your menu XML file. Put a case for every id in that file:
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
         return true;
     }
@@ -159,10 +178,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     public boolean onNavigationItemSelected( MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_home) {
-            Intent mainPage = new Intent(this, MainActivity.class);
             startActivity(mainPage);
         } else if (id == R.id.nav_image) {
-            Intent storedImagesPage = new Intent(this, ListActivity.class);
             startActivity(storedImagesPage);
         } else if (id == R.id.nav_help) {
 
@@ -177,8 +194,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 })
                 //Show the dialog
                 .create().show();
-
-
         }
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
@@ -187,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         return true;
     }
     @Override
-    // EditText is saved whenever the activity goes into the background.
+    // textView is saved whenever the activity goes into the background.
     protected void onPause() {
         super.onPause();
         saveSharedPrefs(textView.getText().toString());
@@ -210,8 +225,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private String url ;
     private String title;
     private String fileName;
-    long newId;
-
 
         public String doInBackground(String... args) {
 
@@ -248,7 +261,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 url = NasaData.getString("url");
                 title = NasaData.getString("title");
 
-
                 return "Success";
 
             } catch (Exception e) {
@@ -264,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
         // separate network operation (downloading files, API calls) from UI threads so that UI thread isnt blocked
         public void onPostExecute(String fromDoInBackground) {
-            //myAdapter.notifyDataSetChanged();
+
             if ("Success".equals(fromDoInBackground)){
                 textView_title.setText(title);
                 //textView_explanation.setText(explanation);
@@ -279,24 +291,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
             // Set up button click listener to download the image
             saveBtn.setOnClickListener((click) -> {
-                // Save to database and Trigger the image download task when the button is clicked
-                ContentValues newRowValues = new ContentValues();
-                //put items to their database columns
-                newRowValues.put(MyOpener.COL_DATE, date);
-                newRowValues.put(MyOpener.COL_EXPLANATION, explanation);
-                newRowValues.put(MyOpener.COL_HDURL, hdUrl);
-                newRowValues.put(MyOpener.COL_URL, url);
-                newRowValues.put(MyOpener.COL_TITLE, title);
-                // Generate a filename based on the id
-                fileName = title.replace(" ", "-") + "-" + date + ".jpg";
-                newRowValues.put(MyOpener.COL_IMG_FILE, fileName);
-
-                //Now insert in the database:
-                //insert method returns the new row's ID,
-                newId = db.insert(MyOpener.TABLE_NAME, null, newRowValues);
-
-                Log.i("db", "Saved to db: " + fileName);
-                new DownloadImageTask().execute(url, fileName);
+                // call async task to download img to files directory
+                new DownloadImageTask().execute(url, title, hdUrl, date, explanation);
             });
 
         }
@@ -307,11 +303,41 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             // Show the progress bar before starting doInBackground
             progressBar.setVisibility(View.VISIBLE);
         }
+
         protected Boolean doInBackground(String... params) {
             String imageUrl = params[0];
-            String fileName = params[1];
+            String title = params[1];
+            String hdUrl = params[2];
+            String date = params[3];
+            String explanation = params[4];
+
             Bitmap newImg = null;
 
+            // Generate a filename based on the title + date
+            String fileName = title.replace(" ", "-") + "-" + date + ".jpg";
+            File imageFile = new File(getFilesDir(), fileName );
+
+            if (imageFile.exists()) {
+                Log.d("DownloadImageTask", "File already exists, no need to download.");
+                return false; // File already exists, no need to download
+            }
+
+            // Save to database
+            ContentValues newRowValues = new ContentValues();
+            //put items to their database columns
+            newRowValues.put(MyOpener.COL_DATE, date);
+            newRowValues.put(MyOpener.COL_EXPLANATION, explanation);
+            newRowValues.put(MyOpener.COL_HDURL, hdUrl);
+            newRowValues.put(MyOpener.COL_URL, imageUrl);
+            newRowValues.put(MyOpener.COL_TITLE, title);
+            newRowValues.put(MyOpener.COL_IMG_FILE, fileName);
+
+            //Now insert in the database:
+            //insert method returns the new row's ID,
+            db.insert(MyOpener.TABLE_NAME, null, newRowValues);
+
+            // check to see if insert was succesful
+            Log.i("db", "Saved to db: " + fileName);
 
             try {
                 // Open a connection to the image URL
@@ -321,37 +347,32 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 // Decode the image from the input stream
                 newImg = BitmapFactory.decodeStream(connection.getInputStream());
 
-                File imageFile = new File(getFilesDir(), fileName );
-
-                // Check if the file already exists
-                if (!imageFile.exists()) {
-                    try {
-                        FileOutputStream outputStream = new FileOutputStream(imageFile);
-                        newImg.compress(Bitmap.CompressFormat.JPEG, 80, outputStream); // Save as JPEG
-                        outputStream.flush(); // Ensure data is written to file
-                        outputStream.close();
-
-                        for (int i = 0; i <= 100; i++) {
-                            try {
-                                Thread.sleep(15);
-                                publishProgress(i); // Update progress
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                        return true;  // Image saved successfully
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        return false;  // Error saving image
-                    }
-                } else {
-                    return false;  // Image already exists
+                if (newImg == null) {
+                    Log.e("DownloadImageTask", "Failed to decode image from input stream.");
+                    return false; // Error decoding the image
                 }
+
+                // save file to files directory
+                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                newImg.compress(Bitmap.CompressFormat.JPEG, 80, outputStream); // Save as JPEG
+                outputStream.flush(); // Ensure data is written to file
+                outputStream.close();
+
+
+                // update the progress bar
+                for (int i = 0; i <= 100; i++) {
+                    try {
+                        Thread.sleep(15);
+                        publishProgress(i); // Update progress
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                return true;  // Image saved successfully
 
             } catch (IOException e) {
                 e.printStackTrace();
-                return false;  // Error downloading the image
+                return false;  // Error saving image
             }
 
         }
